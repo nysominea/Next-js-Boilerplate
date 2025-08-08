@@ -1,14 +1,26 @@
 pipeline {
-  agent any
-  stages {
-    stage('Build') {
-      steps {
-        sh 'npm install'
-      }
+  agent {
+    kubernetes {
+      yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: nodejs
+    image: node:18-alpine
+    command:
+    - cat
+    tty: true
+"""
     }
-    stage('Test') {
+  }
+
+  stages {
+    stage('Install') {
       steps {
-        sh 'npm test'
+        container('nodejs') {
+          sh 'npm install'
+        }
       }
     }
   }
